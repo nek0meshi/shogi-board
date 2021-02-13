@@ -1,1 +1,1 @@
-# shogi-ban
+# shogi-board
