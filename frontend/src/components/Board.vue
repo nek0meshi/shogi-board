@@ -26,7 +26,11 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+$board-size: 50px;
+$top-frame-size: 20px;
+$board-border-width: 1px;
+
 .board-container {
   display: inline-block;
 }
@@ -35,26 +39,26 @@ export default {
   flex-direction: row-reverse;
 }
 .column:nth-child(2) .box {
-  border-right: 1px solid black;
+  border-right: $board-border-width solid black;
 }
 .box {
-  border-left: 1px solid black;
-  border-bottom: 1px solid black;
-  height: 50px;
-  width: 50px;
+  border-left: $board-border-width solid black;
+  border-bottom: $board-border-width solid black;
+  height: $board-size;
+  width: $board-size;
 }
 .box:nth-child(2) {
-  border-top: 1px solid black;
+  border-top: $board-border-width solid black;
 }
 .top-frame {
-  height: 20px;
+  height: $top-frame-size;
 }
 .left-frame-container {
   width: 20px;
-  padding-top: 20px;
+  padding-top: $top-frame-size;
 }
 .left-frame {
-  height: 51px;
-  line-height: 51px;
+  height: calc(#{$board-size} + #{$board-border-width});
+  line-height: calc(#{$board-size} + #{$board-border-width});
 }
 </style>
