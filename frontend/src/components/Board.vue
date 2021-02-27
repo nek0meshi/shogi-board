@@ -11,18 +11,43 @@
         <div v-for="r in rows" :key="r" class="box">
         </div>
       </div>
+      <div
+        v-for="p in pieces"
+        class="piece"
+        :style="pieceStyle(p)"
+        :key="p.id"
+      >
+        {{ p.name }}
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 export default {
+  props: {
+    pieces: {
+      type: Array,
+      default: () => [],
+    },
+  },
+
   data () {
     return {
       columns: [1, 2, 3, 4, 5, 6, 7, 8, 9],
       rows: ['一', '二', '三', '四', '五', '六', '七', '八', '九'],
     }
-  }
+  },
+
+  methods: {
+    pieceStyle(piece) {
+      return {
+        right: (21 + 51 * (piece.column - 1)) + 'px',
+        top: (21 + 51 * (piece.row - 1)) + 'px',
+        transform: 'rotate(' + (piece.isFirst ? 0 : 180) + 'deg)',
+      }
+    },
+  },
 }
 </script>
 
@@ -37,6 +62,7 @@ $board-border-width: 1px;
 .board {
   display: flex;
   flex-direction: row-reverse;
+  position: relative;
 }
 .column:nth-child(2) .box {
   border-right: $board-border-width solid black;
@@ -60,5 +86,11 @@ $board-border-width: 1px;
 .left-frame {
   height: calc(#{$board-size} + #{$board-border-width});
   line-height: calc(#{$board-size} + #{$board-border-width});
+}
+.piece {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  font-size: 32px;
 }
 </style>
