@@ -14,7 +14,7 @@
       </div>
       <div v-for="c in columns" :key="c" class="column">
         <div class="top-frame">{{ c }}</div>
-        <div v-for="r in rows" :key="r" class="box" @click="boxSelect(c, r)">
+        <div v-for="r in rows" :key="r" class="box" @click="selectBox(c, r)">
         </div>
       </div>
       <div
@@ -100,7 +100,7 @@ export default {
       }
     },
 
-    boxSelect(column, row) {
+    selectBox(column, row) {
       if (this.selected) {
         this.selected.column = column
         this.selected.row = row
@@ -212,7 +212,6 @@ $border-color: black;
 }
 .second-stand {
   margin-right: 20px;
-  // transform: rotate(180deg);
 }
 .stand-piece {
   display: inline-flex;
