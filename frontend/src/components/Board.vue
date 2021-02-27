@@ -9,12 +9,12 @@
     <div class="board">
       <div class="left-frame-container">
         <div v-for="r in rows" :key="r" class="left-frame">
-          {{ r }}
+          {{ getRowText(r) }}
         </div>
       </div>
       <div v-for="c in columns" :key="c" class="column">
         <div class="top-frame">{{ c }}</div>
-        <div v-for="r in rows" :key="r" class="box">
+        <div v-for="r in rows" :key="r" class="box" @click="boxSelect(c, r)">
         </div>
       </div>
       <div
@@ -22,6 +22,8 @@
         class="piece"
         :style="pieceStyle(p)"
         :key="p.id"
+        :class="getgetPieceClass(p.id)"
+        @click="selectPiece(p.id)"
       >
         {{ p.name }}
       </div>
@@ -49,6 +51,7 @@ const reduceStandPieces = (carry, piece) => {
   }
   return carry
 }
+
 export default {
   props: {
     pieces: {
@@ -60,7 +63,10 @@ export default {
   data() {
     return {
       columns: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-      rows: ['一', '二', '三', '四', '五', '六', '七', '八', '九'],
+      rows: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      selectedId: null,
+      isFirst: true, // 手番
+      lastMovedPieceId: null,
     }
   },
 
@@ -80,6 +86,9 @@ export default {
         .filter((piece) => piece.column === null)
         .reduce(reduceStandPieces, [])
     },
+    selected() {
+      return this.pieces.find((p) => p.id === this.selectedId)
+    }
   },
 
   methods: {
@@ -90,6 +99,54 @@ export default {
         transform: 'rotate(' + (piece.isFirst ? 0 : 180) + 'deg)',
       }
     },
+
+    boxSelect(column, row) {
+      if (this.selected) {
+        this.selected.column = column
+        this.selected.row = row
+        this.movePiece(this.selected, column, row)
+      }
+    },
+
+    selectPiece(id) {
+      const piece = this.pieces.find((p) => p.id === id)
+
+      if (this.isFirst === piece.isFirst) {
+        this.selectedId = id
+
+        return
+      }
+
+      if (!this.selected) {
+        return
+      }
+
+      this.movePiece(this.selected, piece.column, piece.row, piece)
+    },
+
+    movePiece(piece, column, row, captured = null) {
+      if (captured) {
+        captured.isFirst = this.isFirst
+        captured.column = null
+        captured.row = null
+      }
+      piece.column = column
+      piece.row = row
+      this.lastMovedPieceId = piece.id
+      this.isFirst = !this.isFirst
+      this.selectedId = null
+    },
+
+    getgetPieceClass(id) {
+      return {
+        'selected-piece': this.selectedId === id,
+        'last-moved-piece': this.lastMovedPieceId === id,
+      }
+    },
+
+    getRowText(row) {
+      return ['一', '二', '三', '四', '五', '六', '七', '八', '九'][row - 1]
+    }
   },
 }
 </script>
@@ -136,6 +193,13 @@ $border-color: black;
   width: 50px;
   height: 50px;
   font-size: 32px;
+  cursor: pointer;
+}
+.selected-piece {
+  background-color: orange;
+}
+.last-moved-piece {
+  background-color: red;
 }
 .stand {
   width: 70px;
