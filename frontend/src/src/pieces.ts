@@ -15,10 +15,10 @@ export class Piece {
   type: PieceType; // 駒の種類
   isFirst: boolean; // true: 先手, false: 後手
   isPromoted: boolean; // true: 成り
-  column: number; // 列
-  row: number; // 行
+  column: number | null; // 列
+  row: number | null; // 行
 
-  constructor(type: PieceType, isFirst: boolean, column: number, row: number) {
+  constructor(type: PieceType, isFirst: boolean, column?: number, row?: number) {
     this.type = type;
     this.isFirst = isFirst;
     this.isPromoted = false;
