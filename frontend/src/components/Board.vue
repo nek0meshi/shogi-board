@@ -8,13 +8,19 @@
     </div>
     <div class="board">
       <div class="left-frame-container">
-        <div v-for="r in rows" :key="r" class="left-frame">
+        <div v-for="r in ROWS" :key="r" class="left-frame">
           {{ getRowText(r) }}
         </div>
       </div>
-      <div v-for="c in columns" :key="c" class="column">
+      <div v-for="c in COLUMNS" :key="c" class="column">
         <div class="top-frame">{{ c }}</div>
-        <div v-for="r in rows" :key="r" class="box" @click="selectBox(c, r)">
+        <div
+          v-for="r in ROWS"
+          :key="r"
+          class="box"
+          :class="getBoxClass(c, r)"
+          @click="selectBox(c, r)"
+        >
         </div>
       </div>
       <div
@@ -22,7 +28,7 @@
         class="piece"
         :style="pieceStyle(p)"
         :key="p.id"
-        :class="getgetPieceClass(p.id)"
+        :class="getPieceClass(p.id)"
         @click="selectPiece(p.id)"
       >
         {{ p.name }}
@@ -38,6 +44,8 @@
 </template>
 
 <script>
+const COLUMNS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+const ROWS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 const reduceStandPieces = (carry, piece) => {
   const c = carry.find((p) => p.type === piece.type)
   if (c) {
@@ -62,8 +70,6 @@ export default {
 
   data() {
     return {
-      columns: [1, 2, 3, 4, 5, 6, 7, 8, 9],
-      rows: [1, 2, 3, 4, 5, 6, 7, 8, 9],
       selectedId: null,
       isFirst: true, // 手番
       lastMovedPieceId: null,
@@ -71,6 +77,20 @@ export default {
   },
 
   computed: {
+    /*
+     * 定数.
+     */
+
+    COLUMNS() {
+      return COLUMNS
+    },
+    ROWS() {
+      return ROWS
+    },
+
+    /*
+     * 通常のcomputed properties.
+     */
     onBoardPieces() {
       return this.pieces.filter((piece) => piece.column !== null)
     },
@@ -88,7 +108,7 @@ export default {
     },
     selected() {
       return this.pieces.find((p) => p.id === this.selectedId)
-    }
+    },
   },
 
   methods: {
@@ -101,23 +121,22 @@ export default {
     },
 
     selectBox(column, row) {
-      if (this.selected) {
-        this.selected.column = column
-        this.selected.row = row
-        this.movePiece(this.selected, column, row)
+      if (!this.isMovableBox(column, row)) {
+        return
       }
+      this.selected.column = column
+      this.selected.row = row
+      this.movePiece(this.selected, column, row)
     },
 
     selectPiece(id) {
       const piece = this.pieces.find((p) => p.id === id)
 
-      if (this.isFirst === piece.isFirst) {
-        this.selectedId = id
+      if (!this.isMovableBox(piece.column, piece.row)) {
+        if (this.isFirst === piece.isFirst) {
+          this.selectedId = id
+        }
 
-        return
-      }
-
-      if (!this.selected) {
         return
       }
 
@@ -137,15 +156,42 @@ export default {
       this.selectedId = null
     },
 
-    getgetPieceClass(id) {
+    getPieceClass(id) {
       return {
         'selected-piece': this.selectedId === id,
         'last-moved-piece': this.lastMovedPieceId === id,
       }
     },
 
+    getBoxClass(column, row) {
+      return {
+        'movable-box': this.isMovableBox(column, row),
+      }
+    },
+
     getRowText(row) {
       return ['一', '二', '三', '四', '五', '六', '七', '八', '九'][row - 1]
+    },
+
+    /**
+     * 現在選択中の駒が、移動可能なマスかどうか.
+     */
+    isMovableBox(column, row) {
+      if (!this.selected) {
+        return false
+      }
+
+      if (
+        !!this.pieces.find((piece) => piece.isFirst === this.isFirst
+          && piece.column === column
+          && piece.row === row)
+      ) {
+        // すでに自分の駒があるマスの場合
+        return false
+      }
+
+      return !!this.selected.currentMovableList
+        .find(([c, r]) => c === column && r === row)
     }
   },
 }
@@ -173,6 +219,9 @@ $border-color: black;
   border-bottom: $board-border-width solid $border-color;
   height: $board-size;
   width: $board-size;
+}
+.movable-box {
+  background-color: yellow;
 }
 .box:nth-child(2) {
   border-top: $board-border-width solid $border-color;
