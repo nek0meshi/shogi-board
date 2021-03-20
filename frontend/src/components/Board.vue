@@ -80,7 +80,6 @@ export default {
     /*
      * 定数.
      */
-
     COLUMNS() {
       return COLUMNS
     },
@@ -109,6 +108,51 @@ export default {
     selected() {
       return this.pieces.find((p) => p.id === this.selectedId)
     },
+    currentMovableList() {
+      if (!this.selected) {
+        return []
+      }
+
+      // 先手なら+1, 後手なら-1をかける
+      const sign = this.selected.isFirst ? 1 : -1
+
+      return this.selected.movableList
+        // 移動量に、手番を反映する.
+        .map(([column, row]) => [sign * column, sign * row])
+        // 現在のマスから見た移動可能マスに変換
+        .flatMap(([column, row]) => {
+          if (isFinite(column) && isFinite(row)) {
+            return [[this.selected.column + column, this.selected.row + row]]
+          }
+          // 無限に進める駒.
+          // Infinity -> 1, -Infinity -> -1, 0 -> 0.
+          const columnSign = Math.sign(column)
+          const rowSign = Math.sign(row)
+
+          const res = []
+          for (let i of [...Array(8).keys()].map(i => i + 1)) {
+            // 移動先のマス.
+            const nextBlock = [this.selected.column + i * columnSign, this.selected.row + i * rowSign]
+
+            // 当該マスに今いる駒.
+            const existPiece = this.getPiece(nextBlock[0], nextBlock[1])
+
+            if (existPiece) {
+              // 当該マスにすでに駒がある場合.
+              if (existPiece.isFirst !== this.selected.isFirst) {
+                // 敵の駒なら取れる.
+                res.push(nextBlock)
+              }
+              // これ以上先には移動できない.
+              break
+            }
+            res.push(nextBlock)
+          }
+          return res
+        })
+        // 番外のマスを除く
+        .filter(([column, row]) => column >= 1 && column <= 9 && row >= 1 && row <= 9)
+    }
   },
 
   methods: {
@@ -141,6 +185,11 @@ export default {
       }
 
       this.movePiece(this.selected, piece.column, piece.row, piece)
+    },
+
+    // そのマスにあるコマを取得する.
+    getPiece(column, row) {
+      return this.pieces.find((p) => p.column === column && p.row === row)
     },
 
     movePiece(piece, column, row, captured = null) {
@@ -190,7 +239,7 @@ export default {
         return false
       }
 
-      return !!this.selected.currentMovableList
+      return !!this.currentMovableList
         .find(([c, r]) => c === column && r === row)
     }
   },
