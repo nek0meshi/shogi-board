@@ -49,16 +49,16 @@ export class Piece {
         [-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1],
       ],
       'rook': [
-        ...[...Array(8).keys()].map((i) => [0, i]),
-        ...[...Array(8).keys()].map((i) => [0, -i]),
-        ...[...Array(8).keys()].map((i) => [i, 0]),
-        ...[...Array(8).keys()].map((i) => [-i, 0]),
+        [+Infinity, 0],
+        [-Infinity, 0],
+        [0, +Infinity],
+        [0, -Infinity],
       ],
       'bishop': [
-        ...[...Array(8).keys()].map((i) => [i, i]),
-        ...[...Array(8).keys()].map((i) => [-i, -i]),
-        ...[...Array(8).keys()].map((i) => [i, -i]),
-        ...[...Array(8).keys()].map((i) => [-i, i]),
+        [+Infinity, +Infinity],
+        [+Infinity, -Infinity],
+        [-Infinity, +Infinity],
+        [-Infinity, -Infinity],
       ],
       'gold': [
         [-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [0, 1],
@@ -70,23 +70,11 @@ export class Piece {
         [-1, -2], [1, -2],
       ],
       'lance': [
-        ...[...Array(8).keys()].map((i) => [0, -i]),
+        [0, -Infinity],
       ],
       'pawn': [
         [0, -1],
       ],
     }[this.type];
-  }
-
-  get currentMovableList(): number[][] {
-    // 先手なら+1, 後手なら-1をかける
-    const sign = this.isFirst ? 1 : -1
-
-    return this.movableList
-      .map(([column, row]) => [sign * column, sign * row])
-      // 現在のマスから見た移動可能マスに変換
-      .map(([column, row]) => [this.column + column, this.row + row])
-      // 番外のマスを除く
-      .filter(([column, row]) => column >= 1 && column <= 9 && row >= 1 && row <= 9)
   }
 }
