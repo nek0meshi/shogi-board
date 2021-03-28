@@ -168,8 +168,6 @@ export default {
       if (!this.isMovableBox(column, row)) {
         return
       }
-      this.selected.column = column
-      this.selected.row = row
       this.movePiece(this.selected, column, row)
     },
 
@@ -192,11 +190,30 @@ export default {
       return this.pieces.find((p) => p.column === column && p.row === row)
     },
 
+    /**
+     * captured 移動時にとった駒
+     */
     movePiece(piece, column, row, captured = null) {
       if (captured) {
         captured.isFirst = this.isFirst
         captured.column = null
         captured.row = null
+        captured.isPromoted = false
+      }
+
+      // 駒を成る
+      const isBasefOpponents = (isFirst, row) => isFirst
+        ? [1, 2, 3].includes(row)
+        : [7, 8, 9].includes(row)
+      if (
+        piece.canPromoteCurrent && (
+          isBasefOpponents(piece.isFirst, piece.row) ||
+          isBasefOpponents(piece.isFirst, row)
+        )
+      ) {
+        if (confirm('成りますか？')) {
+          piece.isPromoted = true
+        }
       }
       piece.column = column
       piece.row = row
@@ -209,6 +226,7 @@ export default {
       return {
         'selected-piece': this.selectedId === id,
         'last-moved-piece': this.lastMovedPieceId === id,
+        'promoted-piece': this.pieces.find((p) => p.id === id)?.isPromoted
       }
     },
 
@@ -315,6 +333,9 @@ $border-color: black;
   display: inline-flex;
   align-items: center;
   height: 50px;
+}
+.promoted-piece {
+  color: brown;
 }
 .stand-piece-name {
   width: 50px;
