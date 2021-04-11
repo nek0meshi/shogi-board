@@ -32,6 +32,16 @@ export class Piece {
     if (this.type === 'king') {
       return this.isFirst ? '玉' : '王';
     }
+    if (this.isPromoted) {
+      return {
+        'rook': '龍',
+        'bishop': '馬',
+        'silver': '全',
+        'knight': '圭',
+        'lance': '杏',
+        'pawn': 'と',
+      }[this.type]
+    }
     return {
       'rook': '飛',
       'bishop': '角',
@@ -53,28 +63,45 @@ export class Piece {
         [-Infinity, 0],
         [0, +Infinity],
         [0, -Infinity],
+        ...(this.isPromoted ? [[1, 1], [1, -1], [-1, 1], [-1, -1]] : []),
       ],
       'bishop': [
         [+Infinity, +Infinity],
         [+Infinity, -Infinity],
         [-Infinity, +Infinity],
         [-Infinity, -Infinity],
+        ...(this.isPromoted ? [[1, 0], [-1, 0], [0, 1], [0, -1]] : []),
       ],
       'gold': [
         [-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [0, 1],
       ],
-      'silver': [
-        [-1, -1], [0, -1], [1, -1], [-1, 1], [1, 1],
-      ],
-      'knight': [
-        [-1, -2], [1, -2],
-      ],
-      'lance': [
-        [0, -Infinity],
-      ],
-      'pawn': [
-        [0, -1],
-      ],
+      'silver': this.isPromoted
+        ? [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [0, 1]]
+        : [[-1, -1], [0, -1], [1, -1], [-1, 1], [1, 1]],
+      'knight': this.isPromoted
+        ? [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [0, 1]]
+        : [[-1, -2], [1, -2]],
+      'lance': this.isPromoted
+        ? [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [0, 1]]
+        : [[0, -Infinity],],
+      'pawn': this.isPromoted
+        ? [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [0, 1]]
+        : [[0, -1],],
     }[this.type];
+  }
+
+  get canPromote(): boolean {
+    return [
+      'rook',
+      'bishop',
+      'silver',
+      'knight',
+      'lance',
+      'pawn',
+    ].includes(this.type);
+  }
+
+  get canPromoteCurrent(): boolean {
+    return this.canPromote && !this.isPromoted;
   }
 }
