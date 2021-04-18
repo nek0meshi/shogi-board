@@ -13,12 +13,16 @@ down-v:
 	docker-compose down -v
 
 .PHONY: sh
-f-sh:
+sh:
 	docker-compose exec ${CONTAINER_NAME} sh
 
 .PHONY: yarn
 yarn:
 	docker-compose exec ${CONTAINER_NAME} sh -c "yarn && yarn dev"
+
+.PHONY: build
+build:
+	docker-compose exec ${CONTAINER_NAME} sh -c "yarn && yarn build --outDir ../docs"
 
 .PHONY: create-project
 create-project:

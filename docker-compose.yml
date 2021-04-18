@@ -7,5 +7,6 @@ services:
       - 3000:3000
     volumes:
       - ./frontend:/frontend:cached
+      - ./docs:/docs:cached
     tty: true
     working_dir: /frontend
