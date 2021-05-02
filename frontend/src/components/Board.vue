@@ -1,8 +1,16 @@
 <template>
   <div class="board-container">
     <div class="stand second-stand">
-      <div v-for="p in secondStandPieces" :key="p.type" class="stand-piece">
-        <span class="stand-piece-name">{{ p.name }}</span>
+      <div
+        v-for="p in secondStandPieces"
+        :key="p.type"
+        class="stand-piece"
+        :class="getStandPieceClass(false, p.type)"
+      >
+        <span
+          class="stand-piece-name"
+          @click="selectPieceOnStand(false, p.type)"
+        >{{ p.name }}</span>
         <span class="stand-piece-count">{{ p.count }}</span>
       </div>
     </div>
@@ -35,8 +43,16 @@
       </div>
     </div>
     <div class="stand first-stand">
-      <div v-for="p in firstStandPieces" :key="p.type" class="stand-piece">
-        <span class="stand-piece-name">{{ p.name }}</span>
+      <div
+        v-for="p in firstStandPieces"
+        :key="p.type"
+        class="stand-piece"
+        :class="getStandPieceClass(true, p.type)"
+      >
+        <span
+          class="stand-piece-name"
+          @click="selectPieceOnStand(true, p.type)"
+        >{{ p.name }}</span>
         <span class="stand-piece-count">{{ p.count }}</span>
       </div>
     </div>
@@ -70,9 +86,10 @@ export default {
 
   data() {
     return {
-      selectedId: null,
       isFirst: true, // 手番
       lastMovedPieceId: null,
+      selectedId: null,
+      selectedTypeOnStand: null,
     }
   },
 
@@ -90,25 +107,47 @@ export default {
     /*
      * 通常のcomputed properties.
      */
+    // 盤上にある駒
     onBoardPieces() {
       return this.pieces.filter((piece) => piece.column !== null)
     },
+    // 先手番の駒台にある駒
     firstStandPieces() {
       return this.pieces
         .filter((piece) => piece.isFirst)
         .filter((piece) => piece.column === null)
         .reduce(reduceStandPieces, [])
     },
+    // 後手番の駒台にある駒
     secondStandPieces() {
       return this.pieces
         .filter((piece) => !piece.isFirst)
         .filter((piece) => piece.column === null)
         .reduce(reduceStandPieces, [])
     },
+    // 駒台の駒が選択されている
+    isSelectedStandPiece() {
+      return this.selectedTypeOnStand
+    },
+    // 選択されている駒
     selected() {
       return this.pieces.find((p) => p.id === this.selectedId)
     },
+    // 今動かせる駒のリスト
     currentMovableList() {
+      if (this.isSelectedStandPiece) {
+        // 駒台の駒が選択されている場合
+        const boxes = []
+        for (const c of COLUMNS) {
+          for (const r of ROWS) {
+            if (!this.pieces.find((p) => p.column === c && p.row === r)) {
+              boxes.push([c, r])
+            }
+          }
+        }
+
+        return boxes
+      }
       if (!this.selected) {
         return []
       }
@@ -168,7 +207,15 @@ export default {
       if (!this.isMovableBox(column, row)) {
         return
       }
-      this.movePiece(this.selected, column, row)
+      if (this.selected) {
+        this.movePiece(this.selected, column, row)
+      } else {
+        const piece = this.pieces
+          .filter((p) => p.isFirst === this.isFirst)
+          .filter((p) => !p.column)
+          .find((p) => p.type === this.selectedTypeOnStand)
+        this.movePiece(piece, column, row, null, true)
+      }
     },
 
     selectPiece(id) {
@@ -177,12 +224,22 @@ export default {
       if (!this.isMovableBox(piece.column, piece.row)) {
         if (this.isFirst === piece.isFirst) {
           this.selectedId = id
+          this.selectedTypeOnStand = null
         }
 
         return
       }
 
       this.movePiece(this.selected, piece.column, piece.row, piece)
+    },
+
+    selectPieceOnStand(isFirst, type) {
+      if (isFirst !== this.isFirst) {
+        // 相手の駒台には触れない.
+        return
+      }
+      this.selectedId = null
+      this.selectedTypeOnStand = type
     },
 
     // そのマスにあるコマを取得する.
@@ -192,8 +249,9 @@ export default {
 
     /**
      * captured 移動時にとった駒
+     * fromStand 駒台の駒を盤に置く場合
      */
-    movePiece(piece, column, row, captured = null) {
+    movePiece(piece, column, row, captured = null, fromStand = false) {
       if (captured) {
         captured.isFirst = this.isFirst
         captured.column = null
@@ -201,18 +259,20 @@ export default {
         captured.isPromoted = false
       }
 
-      // 駒を成る
-      const isBasefOpponents = (isFirst, row) => isFirst
-        ? [1, 2, 3].includes(row)
-        : [7, 8, 9].includes(row)
-      if (
-        piece.canPromoteCurrent && (
-          isBasefOpponents(piece.isFirst, piece.row) ||
-          isBasefOpponents(piece.isFirst, row)
-        )
-      ) {
-        if (confirm('成りますか？')) {
-          piece.isPromoted = true
+      if (!fromStand) {
+        // 駒を成る
+        const isBasefOpponents = (isFirst, row) => isFirst
+          ? [1, 2, 3].includes(row)
+          : [7, 8, 9].includes(row)
+        if (
+          piece.canPromoteCurrent && (
+            isBasefOpponents(piece.isFirst, piece.row) ||
+            isBasefOpponents(piece.isFirst, row)
+          )
+        ) {
+          if (confirm('成りますか？')) {
+            piece.isPromoted = true
+          }
         }
       }
       piece.column = column
@@ -220,6 +280,7 @@ export default {
       this.lastMovedPieceId = piece.id
       this.isFirst = !this.isFirst
       this.selectedId = null
+      this.selectedTypeOnStand = null
     },
 
     getPieceClass(id) {
@@ -227,6 +288,14 @@ export default {
         'selected-piece': this.selectedId === id,
         'last-moved-piece': this.lastMovedPieceId === id,
         'promoted-piece': this.pieces.find((p) => p.id === id)?.isPromoted
+      }
+    },
+
+    getStandPieceClass(isFirst, type) {
+      const isSelected = isFirst === this.isFirst
+        && type === this.selectedTypeOnStand
+      return {
+        'selected-stand-piece': isSelected,
       }
     },
 
@@ -244,7 +313,7 @@ export default {
      * 現在選択中の駒が、移動可能なマスかどうか.
      */
     isMovableBox(column, row) {
-      if (!this.selected) {
+      if (!this.selected && !this.isSelectedStandPiece) {
         return false
       }
 
@@ -314,6 +383,9 @@ $border-color: black;
 .selected-piece {
   background-color: orange;
 }
+.selected-stand-piece {
+  background-color: orange;
+}
 .last-moved-piece {
   background-color: red;
 }
@@ -333,6 +405,7 @@ $border-color: black;
   display: inline-flex;
   align-items: center;
   height: 50px;
+  cursor: pointer;
 }
 .promoted-piece {
   color: brown;
