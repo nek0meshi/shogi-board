@@ -34,7 +34,7 @@
       <div
         v-for="p in onBoardPieces"
         class="piece"
-        :style="pieceStyle(p)"
+        :style="getPieceStyle(p)"
         :key="p.id"
         :class="getPieceClass(p.id)"
         @click="selectPiece(p.id)"
@@ -60,227 +60,36 @@
 </template>
 
 <script>
+import useGame from '../composable/use-game'
+
 const COLUMNS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 const ROWS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-const reduceStandPieces = (carry, piece) => {
-  const c = carry.find((p) => p.type === piece.type)
-  if (c) {
-    c.count += 1
-  } else {
-    carry.push({
-      type: piece.type,
-      name: piece.name,
-      count: 1,
-    })
-  }
-  return carry
-}
 
 export default {
-  props: {
-    pieces: {
-      type: Array,
-      default: () => [],
-    },
-  },
+  setup() {
+    const game = useGame()
 
-  data() {
     return {
-      isFirst: true, // 手番
-      lastMovedPieceId: null,
-      selectedId: null,
-      selectedTypeOnStand: null,
+      ...game,
     }
   },
 
   computed: {
-    /*
-     * 定数.
-     */
     COLUMNS() {
       return COLUMNS
     },
     ROWS() {
       return ROWS
     },
-
-    /*
-     * 通常のcomputed properties.
-     */
-    // 盤上にある駒
-    onBoardPieces() {
-      return this.pieces.filter((piece) => piece.column !== null)
-    },
-    // 先手番の駒台にある駒
-    firstStandPieces() {
-      return this.pieces
-        .filter((piece) => piece.isFirst)
-        .filter((piece) => piece.column === null)
-        .reduce(reduceStandPieces, [])
-    },
-    // 後手番の駒台にある駒
-    secondStandPieces() {
-      return this.pieces
-        .filter((piece) => !piece.isFirst)
-        .filter((piece) => piece.column === null)
-        .reduce(reduceStandPieces, [])
-    },
-    // 駒台の駒が選択されている
-    isSelectedStandPiece() {
-      return this.selectedTypeOnStand
-    },
-    // 選択されている駒
-    selected() {
-      return this.pieces.find((p) => p.id === this.selectedId)
-    },
-    // 今動かせる駒のリスト
-    currentMovableList() {
-      if (this.isSelectedStandPiece) {
-        // 駒台の駒が選択されている場合
-        const boxes = []
-        for (const c of COLUMNS) {
-          for (const r of ROWS) {
-            if (!this.pieces.find((p) => p.column === c && p.row === r)) {
-              boxes.push([c, r])
-            }
-          }
-        }
-
-        return boxes
-      }
-      if (!this.selected) {
-        return []
-      }
-
-      // 先手なら+1, 後手なら-1をかける
-      const sign = this.selected.isFirst ? 1 : -1
-
-      return this.selected.movableList
-        // 移動量に、手番を反映する.
-        .map(([column, row]) => [sign * column, sign * row])
-        // 現在のマスから見た移動可能マスに変換
-        .flatMap(([column, row]) => {
-          if (isFinite(column) && isFinite(row)) {
-            return [[this.selected.column + column, this.selected.row + row]]
-          }
-          // 無限に進める駒.
-          // Infinity -> 1, -Infinity -> -1, 0 -> 0.
-          const columnSign = Math.sign(column)
-          const rowSign = Math.sign(row)
-
-          const res = []
-          for (let i of [...Array(8).keys()].map(i => i + 1)) {
-            // 移動先のマス.
-            const nextBlock = [this.selected.column + i * columnSign, this.selected.row + i * rowSign]
-
-            // 当該マスに今いる駒.
-            const existPiece = this.getPiece(nextBlock[0], nextBlock[1])
-
-            if (existPiece) {
-              // 当該マスにすでに駒がある場合.
-              if (existPiece.isFirst !== this.selected.isFirst) {
-                // 敵の駒なら取れる.
-                res.push(nextBlock)
-              }
-              // これ以上先には移動できない.
-              break
-            }
-            res.push(nextBlock)
-          }
-          return res
-        })
-        // 番外のマスを除く
-        .filter(([column, row]) => column >= 1 && column <= 9 && row >= 1 && row <= 9)
-    }
   },
 
   methods: {
-    pieceStyle(piece) {
+    getPieceStyle(piece) {
       return {
         right: (21 + 51 * (piece.column - 1)) + 'px',
         top: (21 + 51 * (piece.row - 1)) + 'px',
         transform: 'rotate(' + (piece.isFirst ? 0 : 180) + 'deg)',
       }
-    },
-
-    selectBox(column, row) {
-      if (!this.isMovableBox(column, row)) {
-        return
-      }
-      if (this.selected) {
-        this.movePiece(this.selected, column, row)
-      } else {
-        const piece = this.pieces
-          .filter((p) => p.isFirst === this.isFirst)
-          .filter((p) => !p.column)
-          .find((p) => p.type === this.selectedTypeOnStand)
-        this.movePiece(piece, column, row, null, true)
-      }
-    },
-
-    selectPiece(id) {
-      const piece = this.pieces.find((p) => p.id === id)
-
-      if (!this.isMovableBox(piece.column, piece.row)) {
-        if (this.isFirst === piece.isFirst) {
-          this.selectedId = id
-          this.selectedTypeOnStand = null
-        }
-
-        return
-      }
-
-      this.movePiece(this.selected, piece.column, piece.row, piece)
-    },
-
-    selectPieceOnStand(isFirst, type) {
-      if (isFirst !== this.isFirst) {
-        // 相手の駒台には触れない.
-        return
-      }
-      this.selectedId = null
-      this.selectedTypeOnStand = type
-    },
-
-    // そのマスにあるコマを取得する.
-    getPiece(column, row) {
-      return this.pieces.find((p) => p.column === column && p.row === row)
-    },
-
-    /**
-     * captured 移動時にとった駒
-     * fromStand 駒台の駒を盤に置く場合
-     */
-    movePiece(piece, column, row, captured = null, fromStand = false) {
-      if (captured) {
-        captured.isFirst = this.isFirst
-        captured.column = null
-        captured.row = null
-        captured.isPromoted = false
-      }
-
-      if (!fromStand) {
-        // 駒を成る
-        const isBasefOpponents = (isFirst, row) => isFirst
-          ? [1, 2, 3].includes(row)
-          : [7, 8, 9].includes(row)
-        if (
-          piece.canPromoteCurrent && (
-            isBasefOpponents(piece.isFirst, piece.row) ||
-            isBasefOpponents(piece.isFirst, row)
-          )
-        ) {
-          if (confirm('成りますか？')) {
-            piece.isPromoted = true
-          }
-        }
-      }
-      piece.column = column
-      piece.row = row
-      this.lastMovedPieceId = piece.id
-      this.isFirst = !this.isFirst
-      this.selectedId = null
-      this.selectedTypeOnStand = null
     },
 
     getPieceClass(id) {
@@ -308,27 +117,6 @@ export default {
     getRowText(row) {
       return ['一', '二', '三', '四', '五', '六', '七', '八', '九'][row - 1]
     },
-
-    /**
-     * 現在選択中の駒が、移動可能なマスかどうか.
-     */
-    isMovableBox(column, row) {
-      if (!this.selected && !this.isSelectedStandPiece) {
-        return false
-      }
-
-      if (
-        !!this.pieces.find((piece) => piece.isFirst === this.isFirst
-          && piece.column === column
-          && piece.row === row)
-      ) {
-        // すでに自分の駒があるマスの場合
-        return false
-      }
-
-      return !!this.currentMovableList
-        .find(([c, r]) => c === column && r === row)
-    }
   },
 }
 </script>
