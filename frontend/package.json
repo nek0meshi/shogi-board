@@ -3,13 +3,15 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "test": "jest"
   },
   "dependencies": {
     "vue": "^3.0.4"
   },
   "devDependencies": {
     "@vue/compiler-sfc": "^3.0.4",
+    "jest": "^26.6.3",
     "sass": "^1.32.7",
     "vite": "^1.0.0-rc.13"
   }
