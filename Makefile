@@ -20,6 +20,10 @@ sh:
 yarn:
 	docker-compose exec ${CONTAINER_NAME} sh -c "yarn && yarn dev"
 
+.PHONY: test
+test:
+	docker-compose exec ${CONTAINER_NAME} sh -c "yarn && yarn test"
+
 .PHONY: build
 build:
 	docker-compose exec ${CONTAINER_NAME} sh -c "yarn && yarn build --outDir ../docs"
