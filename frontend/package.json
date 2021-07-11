@@ -10,9 +10,10 @@
     "vue": "^3.0.4"
   },
   "devDependencies": {
+    "@vitejs/plugin-vue": "^1.2.4",
     "@vue/compiler-sfc": "^3.0.4",
     "jest": "^26.6.3",
     "sass": "^1.32.7",
-    "vite": "^1.0.0-rc.13"
+    "vite": "^2.4.1"
   }
 }
