@@ -31,16 +31,14 @@
         >
         </div>
       </div>
-      <div
+      <piece-on-board
         v-for="p in onBoardPieces"
-        class="piece"
-        :style="getPieceStyle(p)"
         :key="p.id"
-        :class="getPieceClass(p.id)"
-        @click="selectPiece(p.id)"
-      >
-        {{ p.name }}
-      </div>
+        :piece="p"
+        :is-last-moved="lastMovedPieceId === p.id"
+        :is-selected="selectedId === p.id"
+        @click-piece="selectPiece"
+      />
     </div>
     <div class="stand first-stand">
       <div
@@ -61,11 +59,16 @@
 
 <script>
 import useGame from '../composable/use-game'
+import PieceOnBoard from './PieceOnBoard.vue'
 
 const COLUMNS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 const ROWS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 export default {
+  components: {
+    PieceOnBoard,
+  },
+
   setup() {
     const game = useGame()
 
@@ -160,13 +163,6 @@ $border-color: black;
 .left-frame {
   height: calc(#{$board-size} + #{$board-border-width});
   line-height: calc(#{$board-size} + #{$board-border-width});
-}
-.piece {
-  position: absolute;
-  width: 50px;
-  height: 50px;
-  font-size: 32px;
-  cursor: pointer;
 }
 .selected-piece {
   background-color: orange;

@@ -18,7 +18,7 @@ export class Piece {
   column: number | null; // 列, 1 ~ 9
   row: number | null; // 行, 1 ~ 9
 
-  constructor(type: PieceType, isFirst: boolean, column?: number, row?: number) {
+  constructor(type: PieceType, isFirst: boolean, column: number|null = null, row: number|null = null) {
     this.type = type;
     this.isFirst = isFirst;
     this.isPromoted = false;
@@ -33,6 +33,9 @@ export class Piece {
       return this.isFirst ? '玉' : '王';
     }
     if (this.isPromoted) {
+      if ('gold' === this.type) {
+        throw new Error();
+      }
       return {
         'rook': '龍',
         'bishop': '馬',
