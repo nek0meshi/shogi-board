@@ -1,7 +1,5 @@
 <template>
-  <Board
-    :pieces="pieces"
-  />
+  <Board />
 </template>
 
 <script>

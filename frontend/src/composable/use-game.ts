@@ -9,7 +9,7 @@ const ROWS = [1, 2, 3, 4, 5, 6, 7, 8, 9]
  * @param positions 先手の駒配置の配列 [[column, row], [column, row], ...]
  * @return 先手後手両方分のPieceのconstructorの引数
  */
-const splitFirstAndSecond = (name, positions) => positions
+const splitFirstAndSecond = (name: string, positions: Array<[number, number]>) => positions
   .flatMap((position) => ([
     // 先手
     [true, position[0], position[1]],
@@ -158,7 +158,7 @@ export default function useGame() {
   }
 
   // 駒を選択.
-  const selectPiece = (id) => {
+  const selectPiece = (id: number) => {
     const piece = pieces.value.find((p) => p.id === id)
 
     if (!isMovableBox(piece.column, piece.row)) {
@@ -183,7 +183,7 @@ export default function useGame() {
   }
 
   // 駒を動かす
-  const movePiece = (piece, column, row, captured = null, fromStand = false) => {
+  const movePiece = (piece: Piece, column: number, row: number, captured = null, fromStand = false) => {
     if (captured) {
       captured.isFirst = isFirst.value
       captured.column = null
@@ -223,7 +223,7 @@ export default function useGame() {
   }
 
    // 現在選択中の駒にとって、移動可能なマスかどうか.
-  const isMovableBox = (column, row) => {
+  const isMovableBox = (column: number, row: number) => {
     if (!selected.value && !selectedTypeOnStand.value) {
       // 駒を未選択の場合
       return false
