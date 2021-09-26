@@ -18,7 +18,7 @@ sh:
 
 .PHONY: yarn
 yarn:
-	docker-compose exec ${CONTAINER_NAME} sh -c "yarn && yarn dev"
+	docker-compose exec ${CONTAINER_NAME} sh -c "yarn && yarn dev --host 0.0.0.0"
 
 .PHONY: test
 test:
