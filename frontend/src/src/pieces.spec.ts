@@ -1,4 +1,4 @@
-import { Piece, PieceType } from '../src/pieces'
+import { Piece } from '../src/pieces'
 
 describe('pieces.ts', () => {
   it('駒の生成1', () => {

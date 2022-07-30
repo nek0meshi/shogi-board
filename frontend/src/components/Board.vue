@@ -16,20 +16,29 @@
     </div>
     <div class="board">
       <div class="left-frame-container">
-        <div v-for="r in ROWS" :key="r" class="left-frame">
+        <div
+          v-for="r in ROWS"
+          :key="r"
+          class="left-frame"
+        >
           {{ getRowText(r) }}
         </div>
       </div>
-      <div v-for="c in COLUMNS" :key="c" class="column">
-        <div class="top-frame">{{ c }}</div>
+      <div
+        v-for="c in COLUMNS"
+        :key="c"
+        class="column"
+      >
+        <div class="top-frame">
+          {{ c }}
+        </div>
         <div
           v-for="r in ROWS"
           :key="r"
           class="box"
           :class="getBoxClass(c, r)"
           @click="selectBox(c, r)"
-        >
-        </div>
+        />
       </div>
       <piece-on-board
         v-for="p in onBoardPieces"

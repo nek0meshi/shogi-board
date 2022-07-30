@@ -18,6 +18,7 @@ export default defineComponent({
   props: {
     piece: {
       type: Object as PropType<Piece>,
+      required: true,
     },
     isLastMoved: {
       type: Boolean,
@@ -27,6 +28,9 @@ export default defineComponent({
       type: Boolean,
       default: false,
     },
+  },
+  emits: {
+    clickPiece: null,
   },
   setup(props, context) {
     return {
