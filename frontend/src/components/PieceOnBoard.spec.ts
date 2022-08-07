@@ -9,7 +9,7 @@ describe('PieceOnBoard.vue', () => {
         piece: new Piece('pawn', true, 1, 1),
         isLastMoved: false,
         isSelected: false,
-      }
+      },
     })
 
     const div = component.find('div')

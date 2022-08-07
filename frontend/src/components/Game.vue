@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import Board from './Board.vue';
+import Board from './Board.vue'
 
 export default {
   components: {
@@ -25,5 +25,4 @@ h1 {
     margin-left: 10px;
   }
 }
-
 </style>

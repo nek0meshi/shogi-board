@@ -10,7 +10,14 @@ describe('pieces.ts', () => {
     expect(piece.row).toBe(1)
     expect(piece.name).toBe('玉')
     expect(piece.movableList).toEqual([
-      [-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1],
+      [-1, -1],
+      [0, -1],
+      [1, -1],
+      [-1, 0],
+      [1, 0],
+      [-1, 1],
+      [0, 1],
+      [1, 1],
     ])
     expect(piece.canPromote).toBe(false)
   })
@@ -24,7 +31,14 @@ describe('pieces.ts', () => {
     expect(piece.row).toBe(4)
     expect(piece.name).toBe('王')
     expect(piece.movableList).toEqual([
-      [-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1],
+      [-1, -1],
+      [0, -1],
+      [1, -1],
+      [-1, 0],
+      [1, 0],
+      [-1, 1],
+      [0, 1],
+      [1, 1],
     ])
     expect(piece.canPromote).toBe(false)
   })

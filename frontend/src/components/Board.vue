@@ -10,25 +10,18 @@
         <span
           class="stand-piece-name"
           @click="selectPieceOnStand(false, p.type)"
-        >{{ p.name }}</span>
+          >{{ p.name }}</span
+        >
         <span class="stand-piece-count">{{ p.count }}</span>
       </div>
     </div>
     <div class="board">
       <div class="left-frame-container">
-        <div
-          v-for="r in ROWS"
-          :key="r"
-          class="left-frame"
-        >
+        <div v-for="r in ROWS" :key="r" class="left-frame">
           {{ getRowText(r) }}
         </div>
       </div>
-      <div
-        v-for="c in COLUMNS"
-        :key="c"
-        class="column"
-      >
+      <div v-for="c in COLUMNS" :key="c" class="column">
         <div class="top-frame">
           {{ c }}
         </div>
@@ -59,7 +52,8 @@
         <span
           class="stand-piece-name"
           @click="selectPieceOnStand(true, p.type)"
-        >{{ p.name }}</span>
+          >{{ p.name }}</span
+        >
         <span class="stand-piece-count">{{ p.count }}</span>
       </div>
     </div>
@@ -98,8 +92,8 @@ export default {
   methods: {
     getPieceStyle(piece) {
       return {
-        right: (21 + 51 * (piece.column - 1)) + 'px',
-        top: (21 + 51 * (piece.row - 1)) + 'px',
+        right: 21 + 51 * (piece.column - 1) + 'px',
+        top: 21 + 51 * (piece.row - 1) + 'px',
         transform: 'rotate(' + (piece.isFirst ? 0 : 180) + 'deg)',
       }
     },
@@ -108,13 +102,13 @@ export default {
       return {
         'selected-piece': this.selectedId === id,
         'last-moved-piece': this.lastMovedPieceId === id,
-        'promoted-piece': this.pieces.find((p) => p.id === id)?.isPromoted
+        'promoted-piece': this.pieces.find((p) => p.id === id)?.isPromoted,
       }
     },
 
     getStandPieceClass(isFirst, type) {
-      const isSelected = isFirst === this.isFirst
-        && type === this.selectedTypeOnStand
+      const isSelected =
+        isFirst === this.isFirst && type === this.selectedTypeOnStand
       return {
         'selected-stand-piece': isSelected,
       }
