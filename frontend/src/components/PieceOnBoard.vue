@@ -18,6 +18,7 @@ export default defineComponent({
   props: {
     piece: {
       type: Object as PropType<Piece>,
+      required: true,
     },
     isLastMoved: {
       type: Boolean,
@@ -28,11 +29,14 @@ export default defineComponent({
       default: false,
     },
   },
+  emits: {
+    clickPiece: null,
+  },
   setup(props, context) {
     return {
       pieceStyle: computed(() => ({
-        right: (21 + 51 * (props.piece.column - 1)) + 'px',
-        top: (21 + 51 * (props.piece.row - 1)) + 'px',
+        right: 21 + 51 * (props.piece.column - 1) + 'px',
+        top: 21 + 51 * (props.piece.row - 1) + 'px',
         transform: 'rotate(' + (props.piece.isFirst ? 0 : 180) + 'deg)',
       })),
       pieceClass: computed(() => ({
@@ -49,11 +53,11 @@ export default defineComponent({
 </script>
 
 <style scoped>
-  .piece {
-    position: absolute;
-    width: 50px;
-    height: 50px;
-    font-size: 32px;
-    cursor: pointer;
-  }
+.piece {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  font-size: 32px;
+  cursor: pointer;
+}
 </style>

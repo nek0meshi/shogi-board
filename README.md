@@ -24,5 +24,4 @@ https://nek0meshi.github.io/shogi-board/
 * SCSS
 * JavaScript/TypeScript
 * jest
-* Docker
 * github pages
