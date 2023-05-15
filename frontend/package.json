@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "gh-pages": "vite build --outDir ../docs",
+    "gh-pages:clean": "cd ../docs; ls . | grep -v -E 'README.md|.nojekyll' | xargs rm -rf",
     "test": "jest",
     "eslint": "eslint --ext \".js,.ts,.vue\" .",
     "eslint:fix": "eslint --ext \".js,.ts,.vue\" .",

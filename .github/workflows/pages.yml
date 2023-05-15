@@ -1,0 +1,36 @@
+name: Pages
+
+on:
+  push:
+    branch:
+      - gh-pages-release
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 'frontend'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: 'frontend/.tool-versions'
+          cache: 'yarn'
+          cache-dependency-path: 'frontend/yarn.lock'
+      - run: yarn
+      - run: yarn gh-pages:clean
+      - run: yarn gh-pages
+      - run: |
+          git add -A
+          if ! git diff --cached --quiet
+          then
+            git config --global user.email "nekmeshi@gmail.com"
+            git config --global user.name "nek0meshi"
+            git rev-parse HEAD | xargs git commit -m $1
+            git push origin HEAD:gh-pages -f
+          fi
+
+
+
+
