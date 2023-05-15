@@ -1,0 +1,22 @@
+name: Inspection
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  frontend-lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 'frontend'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: 'frontend/.tool-versions'
+          cache: 'yarn'
+          cache-dependency-path: 'frontend/yarn.lock'
+      - run: yarn
+      - run: yarn lint
